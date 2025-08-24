@@ -27,7 +27,7 @@ import {
   DefaultRecordingIcon,
 } from '../shared'
 import FaceLivenessErrorModal from '../shared/FaceLivenessErrorModal.vue'
-import type { FaceLivenessDetectorComponents } from '../shared/DefaultStartScreenComponents.vue'
+import type { FaceLivenessDetectorComponents } from '../shared/DefaultStartScreenComponents'
 import { LivenessClassNames } from '../types/classNames'
 import { isDeviceUserFacing } from '../utils/device'
 import CameraSelector from './CameraSelector.vue'
@@ -340,7 +340,7 @@ const onCameraChange = async (e: Event) => {
 
     <!-- Photosensitive warning -->
     <div v-if="photoSensitivityWarning" :style="{ visibility: isStartView ? 'visible' : 'hidden' }">
-      <DefaultPhotosensitiveWarning
+      <PhotosensitiveWarning
         :body-text="instructionDisplayText.photosensitivityWarningBodyText"
         :heading-text="instructionDisplayText.photosensitivityWarningHeadingText"
         :info-text="instructionDisplayText.photosensitivityWarningInfoText"

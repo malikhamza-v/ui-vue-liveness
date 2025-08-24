@@ -6,7 +6,7 @@ import { livenessMachine } from './service'
 
 import { FaceLivenessDetectorProvider } from './providers'
 import { LivenessCheck } from './LivenessCheck'
-import type { FaceLivenessDetectorComponents } from './shared/DefaultStartScreenComponents.vue'
+import type { FaceLivenessDetectorComponents } from './shared/DefaultStartScreenComponents'
 import type { LivenessDisplayText } from './displayText'
 import { getDisplayText } from './utils/getDisplayText'
 

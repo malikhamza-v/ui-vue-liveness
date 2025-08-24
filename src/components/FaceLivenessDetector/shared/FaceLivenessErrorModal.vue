@@ -13,7 +13,7 @@ export interface FaceLivenessErrorModalProps {
 </script>
 
 <script setup lang="ts">
-interface Props {
+export interface Props {
   displayText?: Partial<ErrorDisplayText>
   onRetry?: () => void
 }

@@ -1,4 +1,3 @@
-<script lang="ts">
 import type { Component } from 'vue'
 import type { CheckScreenComponents } from './FaceLivenessErrorModal.vue'
 import DefaultPhotosensitiveWarning from './DefaultPhotosensitiveWarning.vue'
@@ -12,9 +11,3 @@ export interface StartScreenComponents {
 }
 
 export { DefaultPhotosensitiveWarning, DefaultRecordingIcon, DefaultCancelButton }
-</script>
-
-
-<template>
-  <div></div>
-</template>

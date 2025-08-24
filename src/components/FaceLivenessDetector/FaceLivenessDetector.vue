@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { FaceLivenessDetectorProps as FaceLivenessDetectorPropsFromUi } from './service'
 import type { LivenessDisplayText } from './displayText'
-import type { FaceLivenessDetectorComponents } from './shared/DefaultStartScreenComponents.vue'
+import type { FaceLivenessDetectorComponents } from './shared/DefaultStartScreenComponents'
 
 export interface FaceLivenessDetectorProps
   extends /* @vue-ignore */ FaceLivenessDetectorPropsFromUi {
@@ -15,7 +15,9 @@ import { fetchAuthSession } from 'aws-amplify/auth'
 import FaceLivenessDetectorCore from './FaceLivenessDetectorCore.vue'
 import { computed } from 'vue'
 
-interface Props extends /* @vue-ignore */ FaceLivenessDetectorProps {}
+export interface Props extends /* @vue-ignore */ FaceLivenessDetectorProps {
+  // This interface extends FaceLivenessDetectorProps for Vue component props
+}
 
 const props = defineProps<Props>()
 
@@ -30,8 +32,8 @@ const defaultCredentialProvider = async () => {
 const coreProps = computed(() => {
   const { config, ...rest } = props
 
-  // Use the provided credentialProvider if available, otherwise use default
-  const finalCredentialProvider = config?.credentialProvider || defaultCredentialProvider
+  // Use default credential provider since FaceLivenessDetector wraps the core with Amplify defaults
+  const finalCredentialProvider = defaultCredentialProvider
 
   return {
     ...rest,

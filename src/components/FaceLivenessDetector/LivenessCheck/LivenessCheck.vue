@@ -10,7 +10,7 @@ import CancelButton from '../shared/CancelButton.vue'
 import { defaultErrorDisplayText } from '../displayText'
 import LandscapeErrorModal from '../shared/LandscapeErrorModal.vue'
 import { selectErrorState } from '../shared'
-import type { FaceLivenessDetectorComponents } from '../shared/DefaultStartScreenComponents.vue'
+import type { FaceLivenessDetectorComponents } from '../shared/DefaultStartScreenComponents'
 import type {
   InstructionDisplayText,
   HintDisplayText,

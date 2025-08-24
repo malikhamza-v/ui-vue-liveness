@@ -9,7 +9,7 @@ export { default as LandscapeErrorModal } from './LandscapeErrorModal.vue'
 export * from './FaceLivenessErrorModal.vue'
 export { default as Hint } from './Hint.vue'
 export { default as DefaultRecordingIcon } from './DefaultRecordingIcon.vue'
-export * from './DefaultStartScreenComponents.vue'
+export * from './DefaultStartScreenComponents'
 export { default as DefaultPhotosensitiveWarning } from './DefaultPhotosensitiveWarning.vue'
 export { default as DefaultCancelButton } from './DefaultCancelButton.vue'
 
