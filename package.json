@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Vue 3 Face Liveness Detection component with AWS integration",
   "keywords": ["vue", "vue3", "face-detection", "liveness", "aws", "ui", "component"],
-  "author": "Malik Hamza <malik@example.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/malikhamzav/ui-vue-liveness.git"
