@@ -3,7 +3,8 @@ import type { FaceLivenessDetectorProps as FaceLivenessDetectorPropsFromUi } fro
 import type { LivenessDisplayText } from './displayText'
 import type { FaceLivenessDetectorComponents } from './shared/DefaultStartScreenComponents.vue'
 
-export interface FaceLivenessDetectorProps extends /* @vue-ignore */ FaceLivenessDetectorPropsFromUi {
+export interface FaceLivenessDetectorProps
+  extends /* @vue-ignore */ FaceLivenessDetectorPropsFromUi {
   components?: FaceLivenessDetectorComponents
   displayText?: LivenessDisplayText
 }
@@ -28,21 +29,15 @@ const defaultCredentialProvider = async () => {
 
 const coreProps = computed(() => {
   const { config, ...rest } = props
-  
+
   // Use the provided credentialProvider if available, otherwise use default
   const finalCredentialProvider = config?.credentialProvider || defaultCredentialProvider
-  
-  console.log('🔑 FaceLivenessDetector: Using credential provider', {
-    hasProvidedCredentialProvider: !!config?.credentialProvider,
-    configKeys: Object.keys(config || {}),
-    sessionId: config?.sessionId
-  })
-  
+
   return {
     ...rest,
-    config: { 
-      ...config, 
-      credentialProvider: finalCredentialProvider
+    config: {
+      ...config,
+      credentialProvider: finalCredentialProvider,
     },
   }
 })

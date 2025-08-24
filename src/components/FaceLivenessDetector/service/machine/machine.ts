@@ -72,27 +72,13 @@ const DEFAULT_FACE_FIT_TIMEOUT = 7000
 
 let responseStream: Promise<AsyncIterable<LivenessResponseStream>>
 const responseStreamActor = async (callback: StreamActorCallback) => {
-  console.log('[DEBUG] 🚀 responseStreamActor: Function called, starting stream processing...')
   try {
-    console.log('[DEBUG] 📡 responseStreamActor: Awaiting responseStream...')
     const stream = await responseStream
-    console.log('[DEBUG] ✅ responseStreamActor: Stream received:', stream)
-
     let eventCount = 0
-    console.log('[DEBUG] 🔄 responseStreamActor: Starting to iterate over stream events...')
     for await (const event of stream) {
       eventCount++
-      console.log(`[DEBUG] 📨 responseStreamActor: Processing event #${eventCount}`)
-      console.log('[DEBUG] 📋 Event type:', typeof event)
-      console.log('[DEBUG] 📋 Event keys:', Object.keys(event || {}))
-      console.log('[DEBUG] 📋 Full event:', event)
 
       if (isServerSessionInformationEvent(event)) {
-        console.log('[DEBUG] ✅ responseStreamActor: Found ServerSessionInformationEvent!')
-        console.log(
-          '[DEBUG] 📋 SessionInformation:',
-          event.ServerSessionInformationEvent?.SessionInformation,
-        )
         callback({
           type: 'SET_SESSION_INFO',
           data: {
@@ -203,13 +189,9 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       DISCONNECT_EVENT: { internal: true, actions: 'updateShouldDisconnect' },
       SET_DOM_AND_CAMERA_DETAILS: { actions: 'setDOMAndCameraDetails' },
       UPDATE_DEVICE_AND_STREAM: {
-        actions: [
-          () => console.log('[DEBUG] 📱 Global event: UPDATE_DEVICE_AND_STREAM received'),
-          'updateDeviceAndStream',
-        ],
+        actions: ['updateDeviceAndStream'],
         target: 'start',
         cond: (context, event, { state }) => {
-          console.log('[DEBUG] 🔍 Current state:', state.value)
           // Only transition to start if not in websocket initialization
           return !state.matches('initWebsocket')
         },
@@ -227,8 +209,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
     },
     states: {
       idle: {
-        entry: () =>
-          console.log('[DEBUG] 🔄 Machine in idle state, waiting for INIT_CAMERA event...'),
+        entry: () => {},
         on: {
           INIT_CAMERA: 'initCamera',
         },
@@ -267,11 +248,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
               onDone: [
                 {
                   target: 'waitForSessionInfo',
-                  actions: [
-                    () => console.log('[DEBUG] 🎯 onDone: Service completed successfully'),
-                    'updateLivenessStreamProvider',
-                    'spawnResponseStreamActor',
-                  ],
+                  actions: ['updateLivenessStreamProvider', 'spawnResponseStreamActor'],
                 },
               ],
               onError: {
@@ -523,9 +500,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
     actions: {
       spawnResponseStreamActor: assign({
         responseStreamActorRef: () => {
-          console.log('[DEBUG] 🎬 spawnResponseStreamActor: Spawning responseStreamActor...')
           const actorRef = spawn(responseStreamActor)
-          console.log('[DEBUG] ✅ spawnResponseStreamActor: Actor spawned:', actorRef)
           return actorRef
         },
       }),
@@ -555,10 +530,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       }),
       updateLivenessStreamProvider: assign({
         livenessStreamProvider: (context, event) => {
-          console.log('[DEBUG] 📡 updateLivenessStreamProvider: Updating stream provider')
-          console.log('[DEBUG] 📨 Event data:', event.data)
           const provider = event.data?.livenessStreamProvider as StreamRecorder
-          console.log('[DEBUG] ✅ Stream provider:', provider)
           return provider
         },
       }),
@@ -653,10 +625,11 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       }),
       updateFaceDetailsPostMatch: assign({
         faceMatchAssociatedParams: (context, event) => {
-          const faceMatchState = event.data!.faceMatchState as FaceMatchAssociatedParams['faceMatchState']
+          const faceMatchState = event.data!
+            .faceMatchState as FaceMatchAssociatedParams['faceMatchState']
           // Emit face match state change
-          context.emitFaceMatchState?.(faceMatchState)
-          
+          if (faceMatchState) context.emitFaceMatchState?.(faceMatchState)
+
           return {
             ...context.faceMatchAssociatedParams,
             faceMatchState,
@@ -705,16 +678,10 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       clearErrorState: assign({ errorState: (_) => undefined }),
       updateSessionInfo: assign({
         parsedSessionInformation: (_, event) => {
-          console.log('[DEBUG] 🔄 updateSessionInfo: Processing session info update...')
-          console.log('[DEBUG] 📨 Event:', event)
-          console.log('[DEBUG] 📨 Event data:', event.data)
           const { serverSessionInformation } = event.data! as {
             serverSessionInformation: ServerSessionInformation
           }
-          console.log('[DEBUG] 📋 Server session information:', serverSessionInformation)
           const parsed = createSessionInfoFromServerSessionInformation(serverSessionInformation)
-          console.log('[DEBUG] ✅ Parsed session information:', parsed)
-          console.log('[DEBUG] 🎯 Challenge info:', parsed?.Challenge)
           return parsed
         },
       }),
@@ -737,7 +704,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
 
       // timeouts
       sendTimeoutAfterOvalDrawingDelay: () => {
-        console.log('===check sendTimeoutAfterOvalDrawingDelay')
         return actions.send(
           {
             type: 'RUNTIME_ERROR',
@@ -762,18 +728,9 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
         },
         {
           delay: (context) => {
-            console.log('[DEBUG] ⏰ sendTimeoutAfterOvalMatchDelay: Calculating timeout...')
-            console.log('[DEBUG] 📋 parsedSessionInformation:', context.parsedSessionInformation)
-            console.log('[DEBUG] 📋 Challenge:', context.parsedSessionInformation?.Challenge)
-            console.log(
-              '[DEBUG] 📋 ChallengeConfig:',
-              context.parsedSessionInformation?.Challenge?.ChallengeConfig,
-            )
-
             const timeout =
               context.parsedSessionInformation?.Challenge?.ChallengeConfig?.OvalFitTimeout ??
               DEFAULT_FACE_FIT_TIMEOUT
-            console.log('[DEBUG] ⏰ Using timeout:', timeout)
             return timeout
           },
           id: 'ovalMatchTimeout',
@@ -889,7 +846,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       shouldTimeoutOnFailedAttempts: (context) =>
         context.failedAttempts! >= context.maxFailedAttempts!,
       hasFaceMatchedInOval: (context) => {
-        console.log('[DEBUG] faceMatchState', context.faceMatchAssociatedParams!.faceMatchState)
         // Emit face match state change
         context.emitFaceMatchState?.(context.faceMatchAssociatedParams!.faceMatchState!)
         return context.faceMatchAssociatedParams!.faceMatchState === FaceMatchState.MATCHED
@@ -912,11 +868,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
         return context.freshnessColorAssociatedParams!.freshnessColorsComplete!
       },
       hasParsedSessionInfo: (context) => {
-        console.log('[DEBUG] 🔍 hasParsedSessionInfo: Checking parsedSessionInformation...')
-        console.log('[DEBUG] 📋 parsedSessionInformation:', context.parsedSessionInformation)
-        console.log('[DEBUG] 📋 Challenge:', context.parsedSessionInformation?.Challenge)
         const hasInfo = context.parsedSessionInformation !== undefined
-        console.log('[DEBUG] ✅ hasParsedSessionInfo result:', hasInfo)
         return hasInfo
       },
       hasDOMAndCameraDetails: (context) => {
@@ -1022,7 +974,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
             systemClockOffset,
           })
 
-          console.log('[DEBUG] 🔗 Creating responseStream...')
           responseStream = getResponseStream({
             requestStream,
             sessionId: context.componentProps!.sessionId,
@@ -1030,7 +981,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
             videoWidth: videoWidth.toString(),
           })
 
-          console.log('[DEBUG] ✅ Service completing, returning provider')
           return { livenessStreamProvider }
         } catch (e) {
           console.error('[DEBUG] ❌ Service error:', e)
@@ -1062,7 +1012,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
         const { faceDetector } = context.ovalAssociatedParams!
 
         const { width, height } = videoMediaStream!.getTracks()[0].getSettings()
-        console.log('===check challenge', parsedSessionInformation)
         const challengeConfig = parsedSessionInformation!.Challenge!.ChallengeConfig
 
         const ovalDetails = getStaticLivenessOvalDetails({
@@ -1141,7 +1090,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
         // Compute scaleFactor which is how much our video element is scaled
         // vs the intrinsic video resolution
         const scaleFactor = videoScaledWidth / videoEl!.videoWidth
-        console.log('[DEBUG] video Width', videoScaledWidth, videoEl!.videoWidth)
 
         // generate oval details from initialFace and video dimensions
         const ovalDetails = getOvalDetailsFromSessionInformation({
@@ -1322,7 +1270,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       async getLiveness(context) {
         const { onAnalysisComplete } = context.componentProps!
 
-        console.log('===noice', onAnalysisComplete)
         // Get liveness result
         await onAnalysisComplete()
       },

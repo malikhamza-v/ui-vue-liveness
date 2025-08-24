@@ -1,5 +1,4 @@
 import { useSelector } from '@xstate/vue'
-import { computed } from 'vue'
 
 import { useFaceLivenessDetector } from '../providers'
 import type { LivenessMachineState } from '../service'

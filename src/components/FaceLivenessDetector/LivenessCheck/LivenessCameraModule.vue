@@ -16,12 +16,7 @@ import type {
   CameraDisplayText,
 } from '../displayText'
 
-import {
-  useLivenessActor,
-  useLivenessSelector,
-  createLivenessSelector,
-  useStreamUtils,
-} from '../composables'
+import { useLivenessActor, useLivenessSelector, useStreamUtils } from '../composables'
 import {
   Hint,
   Overlay,
@@ -68,19 +63,6 @@ const { state, send } = useLivenessActor()
 
 const challengeType = useLivenessSelector(selectChallengeType)
 const isFaceMovementChallenge = computed(() => challengeType.value === FACE_MOVEMENT_CHALLENGE.type)
-watch(
-  () => challengeType.value,
-  () => {
-    console.log('===check challenge', challengeType.value)
-  },
-)
-
-watch(
-  () => isFaceMovementChallenge.value,
-  () => {
-    console.log('===check challenge face movement', isFaceMovementChallenge.value)
-  },
-)
 
 const videoConstraints = useLivenessSelector(selectVideoConstraints)
 const selectedDeviceId = useLivenessSelector(selectSelectedDeviceId)
@@ -90,25 +72,6 @@ const faceMatchPercentage = useLivenessSelector(selectFaceMatchPercentage)
 const faceMatchState = useLivenessSelector(selectFaceMatchState)
 const errorState = useLivenessSelector(selectErrorState)
 const { videoRef, videoWidth, videoHeight, videoStream } = useStreamUtils()
-
-console.log('📷 LivenessCameraModule: Initial state', {
-  hasVideoStream: !!videoStream.value,
-  streamTracks: videoStream.value?.getTracks()?.length || 0,
-})
-
-// Watch for video stream changes
-watch(
-  videoStream,
-  (newStream, oldStream) => {
-    console.log('📷 LivenessCameraModule: Video stream changed', {
-      hadOldStream: !!oldStream,
-      hasNewStream: !!newStream,
-      newStreamTracks: newStream?.getTracks()?.length || 0,
-      streamId: newStream?.id,
-    })
-  },
-  { immediate: true },
-)
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const freshnessColorRef = ref<HTMLCanvasElement | null>(null)
@@ -125,6 +88,9 @@ const isWaitingForCamera = computed(() =>
     initCamera: 'waitForDOMAndCameraDetails',
   }),
 )
+const isWaitingForChallenge = computed(() =>
+  state.value.matches({ recording: 'waitForChallengeEvent' }),
+)
 const isStartView = computed(
   () => state.value.matches('start') || state.value.matches('userCancel'),
 )
@@ -137,20 +103,13 @@ const isFlashingFreshness = computed(() =>
   }),
 )
 
-// Debug: Track state changes
 watch(
-  state,
-  (newState) => {
-    console.log('🔄 State Machine: State changed to', {
-      state: newState.value,
-      context: {
-        hasVideoStream: !!newState.context.videoAssociatedParams?.videoMediaStream,
-        hasVideoEl: !!newState.context.videoAssociatedParams?.videoEl,
-        errorState: newState.context.errorState,
-      },
-    })
+  () => isWaitingForChallenge.value,
+  () => {
+    if (isWaitingForChallenge.value) {
+      send({ type: 'HANDLE_CHALLENGE' })
+    }
   },
-  { immediate: true },
 )
 
 // Android/Firefox and iOS flip the values of width/height returned from
@@ -204,7 +163,7 @@ const drawOval = () => {
     isStartView.value &&
     isMetadataLoaded.value
 
-  if (shouldDrawOval && canvasRef.value) {
+  if (shouldDrawOval && canvasRef.value && videoStream.value) {
     drawStaticOval(canvasRef.value, videoRef.value!, videoStream.value)
   }
 }
@@ -246,16 +205,7 @@ onUnmounted(() => {
 watch(
   [isCameraReady, () => props.isMobileScreen],
   () => {
-    console.log('📷 LivenessCameraModule: Camera ready state changed', {
-      isCameraReady: isCameraReady.value,
-      hasVideoRef: !!videoRef.value,
-      hasCanvasRef: !!canvasRef.value,
-      hasFreshnessRef: !!freshnessColorRef.value,
-      isMobile: props.isMobileScreen,
-    })
-
     if (isCameraReady.value) {
-      console.log('📷 LivenessCameraModule: Sending SET_DOM_AND_CAMERA_DETAILS to machine')
       send({
         type: 'SET_DOM_AND_CAMERA_DETAILS',
         data: {
@@ -268,10 +218,6 @@ watch(
     }
 
     if (videoRef.value) {
-      console.log('📷 LivenessCameraModule: Updating media dimensions', {
-        videoWidth: videoRef.value.videoWidth,
-        videoHeight: videoRef.value.videoHeight,
-      })
       mediaWidth.value = videoRef.value.videoWidth
       mediaHeight.value = videoRef.value.videoHeight
     }
@@ -290,16 +236,10 @@ const photoSensitivityWarning = computed(() => {
 })
 
 const handleMediaPlay = () => {
-  console.log('📷 LivenessCameraModule: Video canplay event fired')
   isCameraReady.value = true
 }
 
 const handleLoadedMetadata = () => {
-  console.log('📷 LivenessCameraModule: Video loadedmetadata event fired', {
-    videoWidth: videoRef.value?.videoWidth,
-    videoHeight: videoRef.value?.videoHeight,
-    readyState: videoRef.value?.readyState,
-  })
   isMetadataLoaded.value = true
 }
 
