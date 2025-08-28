@@ -29,6 +29,42 @@ import type { ColorSequence, SequenceColorValue } from './ColorSequenceDisplay'
 import { FACE_HEIGHT_WEIGHT, OVAL_HEIGHT_WIDTH_RATIO, PUPIL_DISTANCE_WEIGHT } from './constants'
 
 /**
+ * Calculate yaw angles from facial landmarks
+ * Returns left and right yaw values based on eye-nose-ear positioning
+ */
+export function calculateFaceYaw(face: Face): { leftYaw: number; rightYaw: number } {
+  const { leftEye, rightEye, nose, leftEar, rightEar } = face
+  
+  // Calculate the center point of the eyes
+  const eyeCenter = [
+    (leftEye[0] + rightEye[0]) / 2,
+    (leftEye[1] + rightEye[1]) / 2
+  ]
+  
+  // Calculate vectors from nose to ears
+  const noseToLeftEar = [leftEar[0] - nose[0], leftEar[1] - nose[1]]
+  const noseToRightEar = [rightEar[0] - nose[0], rightEar[1] - nose[1]]
+  
+  // Calculate vector from nose to eye center (forward direction)
+  const noseToEyeCenter = [eyeCenter[0] - nose[0], eyeCenter[1] - nose[1]]
+  
+  // Calculate angles using dot product and cross product
+  function calculateAngle(vec1: number[], vec2: number[]): number {
+    const dot = vec1[0] * vec2[0] + vec1[1] * vec2[1]
+    const cross = vec1[0] * vec2[1] - vec1[1] * vec2[0]
+    return Math.atan2(cross, dot) * (180 / Math.PI)
+  }
+  
+  // Left yaw: angle between forward direction and left ear
+  const leftYaw = calculateAngle(noseToEyeCenter, noseToLeftEar)
+  
+  // Right yaw: angle between forward direction and right ear  
+  const rightYaw = calculateAngle(noseToEyeCenter, noseToRightEar)
+  
+  return { leftYaw, rightYaw }
+}
+
+/**
  * Returns the random number between min and max
  * seeded with the provided random seed.
  */

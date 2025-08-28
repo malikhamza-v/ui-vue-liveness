@@ -30,6 +30,7 @@ import {
   isFaceDistanceBelowThreshold,
   generateBboxFromLandmarks,
   fillOverlayCanvasFractional,
+  calculateFaceYaw,
 } from '../utils/liveness'
 
 import type {
@@ -643,8 +644,21 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
         faceMatchAssociatedParams: (context, event) => {
           const faceMatchState = event.data!
             .faceMatchState as FaceMatchAssociatedParams['faceMatchState']
-          // Emit face match state change
-          if (faceMatchState) context.emitFaceMatchState?.(faceMatchState)
+          const detectedFace = event.data!.detectedFace as Face
+          
+          // Emit face match state change with yaw data when MATCHED
+          if (faceMatchState) {            
+            if (faceMatchState === FaceMatchState.MATCHED && detectedFace) {
+              try {
+                const yawData = calculateFaceYaw(detectedFace)
+                context.emitFaceMatchState?.(faceMatchState, yawData)
+              } catch (error) {
+                context.emitFaceMatchState?.(faceMatchState)
+              }
+            } else {
+              context.emitFaceMatchState?.(faceMatchState)
+            }
+          }
 
           return {
             ...context.faceMatchAssociatedParams,
@@ -653,8 +667,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
               .faceMatchPercentage as FaceMatchAssociatedParams['faceMatchPercentage'],
             illuminationState: event.data!
               .illuminationState as FaceMatchAssociatedParams['illuminationState'],
-            currentDetectedFace: event.data!
-              .detectedFace as FaceMatchAssociatedParams['currentDetectedFace'],
+            currentDetectedFace: detectedFace,
           }
         },
       }),
@@ -862,14 +875,41 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       shouldTimeoutOnFailedAttempts: (context) =>
         context.failedAttempts! >= context.maxFailedAttempts!,
       hasFaceMatchedInOval: (context) => {
-        // Emit face match state change
-        context.emitFaceMatchState?.(context.faceMatchAssociatedParams!.faceMatchState!)
-        return context.faceMatchAssociatedParams!.faceMatchState === FaceMatchState.MATCHED
+        const faceMatchState = context.faceMatchAssociatedParams!.faceMatchState!
+        const currentDetectedFace = context.faceMatchAssociatedParams!.currentDetectedFace
+        
+        // Emit face match state change with yaw data when MATCHED
+        
+        if (faceMatchState === FaceMatchState.MATCHED && currentDetectedFace) {
+          try {
+            const yawData = calculateFaceYaw(currentDetectedFace)
+            context.emitFaceMatchState?.(faceMatchState, yawData)
+          } catch (error) {
+            context.emitFaceMatchState?.(faceMatchState)
+          }
+        } else {
+          context.emitFaceMatchState?.(faceMatchState)
+        }
+        
+        return faceMatchState === FaceMatchState.MATCHED
       },
       hasSingleFace: (context) => {
-        // Emit face match state change
-        context.emitFaceMatchState?.(context.faceMatchAssociatedParams!.faceMatchState!)
-        return context.faceMatchAssociatedParams!.faceMatchState === FaceMatchState.FACE_IDENTIFIED
+        const faceMatchState = context.faceMatchAssociatedParams!.faceMatchState!
+        const currentDetectedFace = context.faceMatchAssociatedParams!.currentDetectedFace
+        
+        // Emit face match state change with yaw data when MATCHED
+        if (faceMatchState === FaceMatchState.MATCHED && currentDetectedFace) {
+          try {
+            const yawData = calculateFaceYaw(currentDetectedFace)
+            context.emitFaceMatchState?.(faceMatchState, yawData)
+          } catch (error) {
+            context.emitFaceMatchState?.(faceMatchState)
+          }
+        } else {
+          context.emitFaceMatchState?.(faceMatchState)
+        }
+        
+        return faceMatchState === FaceMatchState.FACE_IDENTIFIED
       },
       hasSingleFaceBeforeStart: (context) => {
         return context.faceMatchStateBeforeStart === FaceMatchState.FACE_IDENTIFIED
@@ -999,7 +1039,6 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
 
           return { livenessStreamProvider }
         } catch (e) {
-          console.error('[DEBUG] ❌ Service error:', e)
           throw e
         }
       },

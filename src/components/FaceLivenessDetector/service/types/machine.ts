@@ -113,7 +113,7 @@ export interface LivenessContext {
   serverSessionInformation: SessionInformation | undefined;
   shouldDisconnect: boolean | undefined;
   videoAssociatedParams: VideoAssociatedParams | undefined;
-  emitFaceMatchState?: (faceMatchState: FaceMatchState) => void;
+  emitFaceMatchState?: (faceMatchState: FaceMatchState, yawData?: { leftYaw: number; rightYaw: number }) => void;
 }
 
 export type LivenessEventTypes =

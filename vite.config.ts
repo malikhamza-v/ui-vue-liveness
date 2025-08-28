@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
       lib: {
         entry: resolve(__dirname, 'src/index.ts'),
         name: 'UiVueLiveness',
-        fileName: (format) => `ui-vue-liveness.${format === 'es' ? 'js' : format === 'cjs' ? 'umd.cjs' : format}`
+        fileName: (format) => `ui-vue-liveness.${format === 'es' ? 'js' : format === 'umd' ? 'umd.cjs' : format}`
       },
       rollupOptions: {
         external: ['vue', '@aws-amplify/ui-vue', '@aws-amplify/ui'],

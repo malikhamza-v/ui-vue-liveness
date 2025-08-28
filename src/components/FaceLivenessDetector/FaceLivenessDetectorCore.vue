@@ -55,7 +55,7 @@ const props = withDefaults(defineProps<VueFaceLivenessDetectorCoreProps>(), {
 })
 
 const emit = defineEmits<{
-  'face-match-state': [faceMatchState: any]
+  'face-match-state': [faceMatchState: any, yawData?: { leftYaw: number; rightYaw: number }]
 }>()
 
 const currElementRef = ref<HTMLDivElement | null>(null)
@@ -69,8 +69,8 @@ const {
 } = getDisplayText(props.displayText)
 
 // Pass emit function to machine context so it can emit face match state changes
-const emitFaceMatchState = (faceMatchState: any) => {
-  emit('face-match-state', faceMatchState)
+const emitFaceMatchState = (faceMatchState: any, yawData?: { leftYaw: number; rightYaw: number }) => {
+  emit('face-match-state', faceMatchState, yawData)
 }
 
 const service = useInterpret(livenessMachine, {
