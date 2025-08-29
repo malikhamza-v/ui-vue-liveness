@@ -14,12 +14,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/malikhamzav/ui-vue-liveness.git"
+    "url": "git+https://github.com/malikhamza-v/ui-vue-liveness.git"
   },
   "bugs": {
-    "url": "https://github.com/malikhamzav/ui-vue-liveness/issues"
+    "url": "https://github.com/malikhamza-v/ui-vue-liveness/issues"
   },
-  "homepage": "https://github.com/malikhamzav/ui-vue-liveness#readme",
+  "homepage": "https://github.com/malikhamza-v/ui-vue-liveness#readme",
   "type": "module",
   "main": "./dist/ui-vue-liveness.umd.cjs",
   "module": "./dist/ui-vue-liveness.js",
