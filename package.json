@@ -1,6 +1,6 @@
 {
   "name": "ui-vue-liveness",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Vue 3 Face Liveness Detection component with AWS integration",
   "keywords": [
     "vue",
