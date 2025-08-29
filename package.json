@@ -1,8 +1,16 @@
 {
   "name": "ui-vue-liveness",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vue 3 Face Liveness Detection component with AWS integration",
-  "keywords": ["vue", "vue3", "face-detection", "liveness", "aws", "ui", "component"],
+  "keywords": [
+    "vue",
+    "vue3",
+    "face-detection",
+    "liveness",
+    "aws",
+    "ui",
+    "component"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
