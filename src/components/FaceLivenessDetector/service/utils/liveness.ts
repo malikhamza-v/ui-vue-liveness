@@ -30,36 +30,43 @@ import { FACE_HEIGHT_WEIGHT, OVAL_HEIGHT_WIDTH_RATIO, PUPIL_DISTANCE_WEIGHT } fr
 
 /**
  * Calculate yaw angles from facial landmarks
- * Returns left and right yaw values based on eye-nose-ear positioning
+ * Uses the same logic from your dummy.md file
+ * Returns left and right yaw values where:
+ * - Face straight: both values = 0
+ * - Turn left: leftYaw increases (positive)
+ * - Turn right: rightYaw increases (positive)
  */
 export function calculateFaceYaw(face: Face): { leftYaw: number; rightYaw: number } {
-  const { leftEye, rightEye, nose, leftEar, rightEar } = face
+  const { leftEye, rightEye, nose } = face
   
-  // Calculate the center point of the eyes
-  const eyeCenter = [
-    (leftEye[0] + rightEye[0]) / 2,
-    (leftEye[1] + rightEye[1]) / 2
-  ]
-  
-  // Calculate vectors from nose to ears
-  const noseToLeftEar = [leftEar[0] - nose[0], leftEar[1] - nose[1]]
-  const noseToRightEar = [rightEar[0] - nose[0], rightEar[1] - nose[1]]
-  
-  // Calculate vector from nose to eye center (forward direction)
-  const noseToEyeCenter = [eyeCenter[0] - nose[0], eyeCenter[1] - nose[1]]
-  
-  // Calculate angles using dot product and cross product
-  function calculateAngle(vec1: number[], vec2: number[]): number {
-    const dot = vec1[0] * vec2[0] + vec1[1] * vec2[1]
-    const cross = vec1[0] * vec2[1] - vec1[1] * vec2[0]
-    return Math.atan2(cross, dot) * (180 / Math.PI)
+  // Calculate eye center (same as your code)
+  const eyeCenter = {
+    x: (leftEye[0] + rightEye[0]) / 2,
+    y: (leftEye[1] + rightEye[1]) / 2
   }
   
-  // Left yaw: angle between forward direction and left ear
-  const leftYaw = calculateAngle(noseToEyeCenter, noseToLeftEar)
+  // Calculate nose offset from eye center
+  const noseOffset = nose[0] - eyeCenter.x
+  const eyeDistance = Math.abs(rightEye[0] - leftEye[0])
   
-  // Right yaw: angle between forward direction and right ear  
-  const rightYaw = calculateAngle(noseToEyeCenter, noseToRightEar)
+  let yaw = 0
+  if (eyeDistance > 0) {
+    // Convert to degrees with improved calculation (from your code)
+    yaw = (noseOffset / eyeDistance) * 60 // Increased sensitivity
+    yaw = Math.max(-45, Math.min(45, yaw)) // Clamp to -45 to +45 degrees
+  }
+  
+  // Convert single yaw value to left/right yaw values
+  let leftYaw = 0
+  let rightYaw = 0
+  
+  if (yaw < 0) {
+    // Face turned left (negative yaw) - left yaw increases
+    leftYaw = Math.abs(yaw)
+  } else if (yaw > 0) {
+    // Face turned right (positive yaw) - right yaw increases  
+    rightYaw = Math.abs(yaw)
+  }
   
   return { leftYaw, rightYaw }
 }
