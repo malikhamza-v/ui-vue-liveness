@@ -1,34 +1,88 @@
 @import '@aws-amplify/ui/dist/styles.css';
 
-/* Force video element styles for debugging */
-.amplify-liveness-video {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  transform: scaleX(-1) !important;
-  object-fit: cover !important;
-  background-color: red !important;
-  z-index: 10 !important;
-  display: block !important;
-  border: 5px solid lime !important;
+/* Improved Liveness Camera Styling */
+.amplify-liveness-camera-module {
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  background: var(--amplify-colors-background-primary);
 }
 
 .amplify-liveness-video-anchor {
-  position: relative !important;
-  width: 100% !important;
-  min-height: 400px !important;
-  background-color: #333 !important;
-  overflow: hidden !important;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.amplify-liveness-camera-module {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  min-height: 400px !important;
-  background-color: #000 !important;
+.amplify-liveness-video {
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .amplify-liveness-camera-module {
+    margin: 0;
+    border-radius: 0;
+    max-width: none;
+  }
+  
+  .amplify-liveness-video-anchor {
+    border-radius: 0;
+  }
+  
+  .amplify-liveness-video {
+    border-radius: 0;
+  }
+}
+
+/* Enhanced UI elements */
+.amplify-liveness-hint {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.amplify-liveness-hint--mobile {
+  margin: 12px;
+  padding: 12px;
+}
+
+.amplify-liveness-cancel-button {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  border: none;
+  color: var(--amplify-colors-font-primary);
+  transition: all 0.2s ease;
+}
+
+.amplify-liveness-cancel-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.amplify-liveness-match-indicator {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Loader improvements */
+.amplify-liveness-centered-loader,
+.amplify-liveness-connecting-loader {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }

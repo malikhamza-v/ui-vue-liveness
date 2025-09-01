@@ -295,16 +295,22 @@ const onCameraChange = async (e: Event) => {
     :class="
       classNames(
         'amplify-flex',
+        'amplify-flex--direction-column',
+        'amplify-flex--align-items-center',
         'amplify-flex--justify-content-center',
         LivenessClassNames.StartScreenCameraWaiting,
       )
     "
+    style="min-height: 60vh; padding: 32px;"
+    role="status"
+    aria-live="polite"
   >
     <div
       :class="
         classNames('amplify-loader', 'amplify-loader--large', LivenessClassNames.CenteredLoader)
       "
       data-testid="centered-loader"
+      aria-hidden="true"
     >
       <div class="amplify-loader__icon"></div>
     </div>
@@ -314,45 +320,18 @@ const onCameraChange = async (e: Event) => {
           'amplify-text',
           'amplify-text--fontSize-large',
           'amplify-text--fontWeight-bold',
+          'amplify-text--textAlign-center',
           `${LivenessClassNames.StartScreenCameraWaiting}__text`,
         )
       "
       data-testid="waiting-camera-permission"
+      style="margin-top: 16px; max-width: 400px;"
     >
       {{ cameraDisplayText.waitingCameraPermissionText }}
     </div>
   </div>
 
   <template v-else>
-    <!-- Debug Panel (Remove in production) -->
-    <div
-      style="
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        font-size: 12px;
-        z-index: 1000;
-        border-radius: 4px;
-      "
-    >
-      <div><strong>📷 Debug Info:</strong></div>
-      <div>State: {{ state.value }}</div>
-      <div>Has Stream: {{ !!videoStream }}</div>
-      <div>Stream Tracks: {{ videoStream?.getTracks()?.length || 0 }}</div>
-      <div>Camera Ready: {{ isCameraReady }}</div>
-      <div>Metadata Loaded: {{ isMetadataLoaded }}</div>
-      <div>Video Ref: {{ !!videoRef }}</div>
-      <div>Video srcObject: {{ !!videoRef?.srcObject }}</div>
-      <div>Video readyState: {{ videoRef?.readyState }}</div>
-      <div>Video videoWidth: {{ videoRef?.videoWidth }}</div>
-      <div>Video videoHeight: {{ videoRef?.videoHeight }}</div>
-      <div>Media Size: {{ mediaWidth }}x{{ mediaHeight }}</div>
-      <div>Video Size: {{ videoWidth }}x{{ videoHeight }}</div>
-      <div>Video Classes: {{ videoRef?.className }}</div>
-    </div>
 
     <!-- Photosensitive warning -->
     <div v-if="photoSensitivityWarning" :style="{ visibility: isStartView ? 'visible' : 'hidden' }">
@@ -365,14 +344,36 @@ const onCameraChange = async (e: Event) => {
     </div>
 
     <!-- Connecting loader -->
-    <div v-if="shouldShowCenteredLoader" :class="LivenessClassNames.ConnectingLoader">
+    <div 
+      v-if="shouldShowCenteredLoader" 
+      :class="classNames(
+        'amplify-flex',
+        'amplify-flex--direction-column',
+        'amplify-flex--align-items-center',
+        'amplify-flex--justify-content-center',
+        LivenessClassNames.ConnectingLoader
+      )"
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;"
+      role="status"
+      aria-live="polite"
+    >
       <div
         :class="classNames('amplify-loader', 'amplify-loader--large', LivenessClassNames.Loader)"
         data-testid="centered-loader"
+        aria-hidden="true"
       >
         <div class="amplify-loader__icon"></div>
       </div>
-      <div :class="LivenessClassNames.LandscapeErrorModalHeader">
+      <div 
+        :class="classNames(
+          'amplify-text',
+          'amplify-text--fontSize-medium',
+          'amplify-text--fontWeight-semiBold',
+          'amplify-text--textAlign-center',
+          LivenessClassNames.LandscapeErrorModalHeader
+        )"
+        style="margin-top: 16px;"
+      >
         {{ hintDisplayText.hintConnectingText }}
       </div>
     </div>
@@ -442,12 +443,13 @@ const onCameraChange = async (e: Event) => {
       <div
         :class="LivenessClassNames.VideoAnchor"
         :style="{
-          aspectRatio: `${aspectRatio}`,
+          aspectRatio: aspectRatio > 0 ? `${aspectRatio}` : '4/3',
           position: 'relative',
           width: '100%',
           minHeight: '400px',
-          backgroundColor: '#000',
         }"
+        role="region"
+        :aria-label="cameraDisplayText.a11yVideoLabelText || 'Camera preview'"
       >
         <!-- Video element -->
         <video
@@ -459,11 +461,6 @@ const onCameraChange = async (e: Event) => {
           :height="mediaHeight"
           @canplay="handleMediaPlay"
           @loadedmetadata="handleLoadedMetadata"
-          @error="(e) => console.error('❌ Video error:', e)"
-          @loadstart="() => console.log('📷 Video loadstart')"
-          @loadeddata="() => console.log('📷 Video loadeddata')"
-          @play="() => console.log('📷 Video play')"
-          @playing="() => console.log('📷 Video playing')"
           data-testid="video"
           :class="
             classNames(
@@ -472,13 +469,8 @@ const onCameraChange = async (e: Event) => {
               isRecordingStopped && LivenessClassNames.FadeOut,
             )
           "
-          :style="{
-            display: 'block',
-            visibility: 'visible',
-            opacity: '1',
-            zIndex: '1',
-          }"
-          :aria-label="cameraDisplayText.a11yVideoLabelText"
+          :aria-label="cameraDisplayText.a11yVideoLabelText || 'Live camera feed'"
+          tabindex="-1"
         />
 
         <!-- Oval canvas overlay -->
@@ -505,11 +497,13 @@ const onCameraChange = async (e: Event) => {
     </div>
 
     <!-- Start button -->
-    <div v-if="isStartView" class="amplify-flex amplify-flex--justify-content-center">
+    <div v-if="isStartView" class="amplify-flex amplify-flex--justify-content-center" style="padding: 24px;">
       <button
-        class="amplify-button amplify-button--variation-primary"
+        class="amplify-button amplify-button--variation-primary amplify-button--size-large"
         type="button"
         @click="beginLivenessCheck"
+        :aria-label="instructionDisplayText.startScreenBeginCheckText"
+        style="padding: 16px 32px; font-size: 16px; border-radius: 8px; min-width: 200px;"
       >
         {{ instructionDisplayText.startScreenBeginCheckText }}
       </button>

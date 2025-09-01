@@ -23,8 +23,6 @@ import { useLivenessActor, useLivenessSelector } from '../composables'
 import { selectIsRecordingStopped } from './selectors'
 import { isMobileScreen, getLandscapeMediaQuery } from '../utils/device'
 import CancelButton from '../shared/CancelButton.vue'
-import { defaultErrorDisplayText } from '../displayText'
-import LandscapeErrorModal from '../shared/LandscapeErrorModal.vue'
 import { selectErrorState } from '../shared'
 import type { FaceLivenessDetectorComponents } from '../shared/DefaultStartScreenComponents'
 import type {
@@ -104,57 +102,12 @@ onMounted(() => {
     type: 'INIT_CAMERA',
   })
 })
-
-// Computed display text for landscape error
-const landscapeDisplayText = computed(() => ({
-  ...defaultErrorDisplayText,
-  ...props.errorDisplayText,
-}))
 </script>
 
 <template>
   <div :class="CHECK_CLASS_NAME" class="liveness-check-container">
-    <!-- Mobile Landscape Error -->
-    <div
-      v-if="errorState === LivenessErrorState.MOBILE_LANDSCAPE_ERROR"
-      class="error-container landscape-error"
-    >
-      <LandscapeErrorModal
-        :header="landscapeDisplayText.landscapeHeaderText"
-        :portraitMessage="landscapeDisplayText.portraitMessageText"
-        :landscapeMessage="landscapeDisplayText.landscapeMessageText"
-        :tryAgainText="landscapeDisplayText.tryAgainText"
-        @retry="() => send({ type: 'CANCEL' })"
-      />
-    </div>
-
-    <!-- Permission Denied Error -->
-    <div v-else-if="isPermissionDenied" class="error-container permission-error">
-      <h2 class="error-heading">
-        {{
-          errorState === LivenessErrorState.CAMERA_FRAMERATE_ERROR
-            ? cameraMinSpecificationsHeadingText
-            : cameraNotFoundHeadingText
-        }}
-      </h2>
-      <p class="error-message" :style="{ maxWidth: `${CAMERA_ERROR_TEXT_WIDTH}px` }">
-        {{
-          errorState === LivenessErrorState.CAMERA_FRAMERATE_ERROR
-            ? cameraMinSpecificationsMessageText
-            : cameraNotFoundMessageText
-        }}
-      </p>
-      <button class="retry-button" type="button" @click="recheckCameraPermissions">
-        {{ retryCameraPermissionsText }}
-      </button>
-      <div class="cancel-button-container">
-        <CancelButton :ariaLabel="cancelLivenessCheckText" />
-      </div>
-    </div>
-
     <!-- Camera Module -->
     <LivenessCameraModule
-      v-else
       :isMobileScreen="isMobile"
       :isRecordingStopped="isRecordingStopped!"
       :instructionDisplayText="instructionDisplayText"
